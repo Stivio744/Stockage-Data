@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Gestion de Fichiers</title>
+    <style>
+        /* Style global */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6a11cb, #7bd68a);
+            color: #333;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .dashboard {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+
+        /* Menu des onglets */
+        .tabs button {
+            background: #ff3f81;
+            border: none;
+            padding: 12px 25px;
+            margin: 10px 5px;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            border-radius: 30px;
+            transition: background 0.3s ease;
+        }
+
+        .tabs button:hover {
+            background: #ff5773;
+        }
+
+        /* Barre de navigation */
+        .navbar-top {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #ff758c;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .navbar-top button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            margin: 0 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-top button:hover {
+            background: #ff3f81;
+            border-radius: 5px;
+        }
+
+        /* Liste des fichiers */
+        .file-list {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #e9ecef;
+            transform: scale(1.03);
+        }
+
+        .file-item button {
+            padding: 8px 15px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .file-item button.view { background: #28a745; }
+        .file-item button.download { background: #3f73ac; }
+        .file-item button.delete { background: #d9534f; }
+
+        .file-item button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar-top">
+        <button onclick="toggleMenu('accueil')">Accueil</button>
+        <button onclick="toggleMenu('insertion')">Insertion</button>
+    </div>
+
+    <div id="accueil" class="dashboard">
+        <h2 style="color: white;">Gestion de Fichiers</h2>
+        <input type="text" id="search" class="search-bar" placeholder="Rechercher un fichier..." onkeyup="searchFiles()">
+        <div class="tabs">
+            <button onclick="showFiles('document')">Documents</button>
+            <button onclick="showFiles('audio')">Audio</button>
+            <button onclick="showFiles('video')">Vidéos</button>
+            <button onclick="showFiles('photo')">Photos</button>
+            <button onclick="showFiles('divers')">Divers</button>
+        </div>
+        <div id="file-list" class="file-list"></div>
+    </div>
+
+    <div id="insertion" class="dashboard">
+        <h2 style="color: white;">Insertion de Fichiers</h2>
+        <div class="tabs">
+            <button onclick="importFile('document')">Insérer Document</button>
+            <button onclick="importFile('audio')">Insérer Audio</button>
+            <button onclick="importFile('video')">Insérer Vidéo</button>
+            <button onclick="importFile('photo')">Insérer Photo</button>
+            <button onclick="importFile('divers')">Insérer Divers</button>
+        </div>
+        <input type="file" id="fileInput" onchange="handleFileUpload(event)">
+    </div>
+
+    <script>
+        let files = JSON.parse(localStorage.getItem('files')) || { document: [], audio: [], video: [], photo: [], divers: [] };
+
+        function toggleMenu(menu) {
+            document.getElementById('accueil').style.display = 'none';
+            document.getElementById('insertion').style.display = 'none';
+            document.getElementById(menu).style.display = 'flex';
+        }
+
+        function showFiles(type) {
+            let fileList = document.getElementById('file-list');
+            fileList.innerHTML = files[type].map((file, index) => `
+                <div class="file-item">
+                    <span style="color: #333;">${file.name}</span>
+                    <div>
+                        <button class="view" onclick="viewFile('${file.url}')">Voir</button>
+                        <button class="download" onclick="downloadFile('${file.url}', '${file.name}')">Télécharger</button>
+                        <button class="delete" onclick="deleteFile('${type}', ${index})">Supprimer</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteFile(type, index) {
+            files[type].splice(index, 1);
+            localStorage.setItem('files', JSON.stringify(files));
+            showFiles(type);
+        }
+    </script>
+</body>
+</html>
