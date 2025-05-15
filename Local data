@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>R.Chilance - Auth + Dashboard</title>
+  <style>
+    :root {
+      --bg-light: #f0f0f0;
+      --bg-dark: #121212;
+      --card-light: #fff;
+      --card-dark: #1e1e1e;
+      --primary: #0e76a8;
+      --transition: 0.3s ease;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0e76a8, #111);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: var(--transition);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Connexion */
+    .login-container {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--primary);
+      border: none;
+      border-radius: 0.5rem;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    button:hover {
+      background: #095a7a;
+    }
+
+    .error {
+      color: red;
+      margin-top: 0.5rem;
+    }
+
+    /* Dashboard */
+    .dashboard-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #121212;
+      color: #fff;
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+    }
+
+    header {
+      background: #0e76a8;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      position: absolute;
+      right: 1rem;
+      top: 1.2rem;
+      background: #fff;
+      color: #0e76a8;
+      padding: 0.4rem 1rem;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .dashboard {
+      background: #1e1e1e;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem;
+      justify-content: space-around;
+      border-bottom: 2px solid #0e76a8;
+    }
+
+    .card {
+      background: #2b2b2b;
+      border-left: 5px solid #0e76a8;
+      padding: 1rem;
+      flex: 1 1 150px;
+      border-radius: 8px;
+      text-align: center;
+      animation: fadeInUp 0.4s ease forwards;
+    }
+
+    .card h3 {
+      margin: 0.2rem 0;
+      font-size: 1.2rem;
+    }
+
+    .upload-box {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .section {
+      margin: 2rem;
+    }
+
+    .section h2 {
+      border-left: 5px solid #0e76a8;
+      padding-left: 1rem;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .file-card {
+      background: #1f1f1f;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px #0008;
+      animation: fadeInUp 0.6s ease forwards;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .file-card h4 {
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .file-card img,
+    .file-card video,
+    .file-card audio,
+    .file-card iframe {
+      width: 100%;
+      border-radius: 8px;
+      max-height: 200px;
+      object-fit: cover;
+      margin-bottom: 0.5rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: #0e76a8;
+      margin-top: 2rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page de connexion -->
+  <div class="login-container" id="loginPage">
+    <h2>Connexion</h2>
+    <input type="text" id="username" placeholder="Nom d'utilisateur">
+    <input type="password" id="password" placeholder="Mot de passe">
+    <button onclick="login()">Se connecter</button>
+    <div id="error" class="error"></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard-container" id="dashboardPage">
+    <header>
+      📂 Tableau de Bord - R.Chilance
+      <div class="logout-btn" onclick="logout()">Déconnexion</div>
+    </header>
+
+    <div class="dashboard">
+      <div class="card"><h3>📷 Images</h3><p id="imgCount">0</p></div>
+      <div class="card"><h3>🎵 Audios</h3><p id="audioCount">0</p></div>
+      <div class="card"><h3>🎞️ Vidéos</h3><p id="videoCount">0</p></div>
+      <div class="card"><h3>📄 Documents</h3><p id="docCount">0</p></div>
+      <div class="card"><h3>📦 Autres</h3><p id="otherCount">0</p></div>
+      <div class="card"><h3>💾 Taille totale</h3><p id="totalSize">0 Mo</p></div>
+    </div>
+
+    <div class="upload-box">
+      <input type="file" id="fileInput" multiple />
+    </div>
+
+    <div class="section"><h2>📷 Images</h2><div class="grid" id="imageContainer"></div></div>
+    <div class="section"><h2>🎵 Audios</h2><div class="grid" id="audioContainer"></div></div>
+    <div class="section"><h2>🎞️ Vidéos</h2><div class="grid" id="videoContainer"></div></div>
+    <div class="section"><h2>📄 Documents</h2><div class="grid" id="docContainer"></div></div>
+    <div class="section"><h2>📦 Autres</h2><div class="grid" id="otherContainer"></div></div>
+
+    <footer>© 2025 R.Chilance - Tous droits réservés</footer>
+  </div>
+
+  <script>
+    const loginPage = document.getElementById('loginPage');
+    const dashboardPage = document.getElementById('dashboardPage');
+
+    function login() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      const error = document.getElementById('error');
+      if (user === 'admin' && pass === 'admin') {
+        localStorage.setItem('auth', 'true');
+        showDashboard();
+      } else {
+        error.textContent = "Identifiants incorrects.";
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('auth');
+      location.reload();
+    }
+
+    function showDashboard() {
+      loginPage.style.display = 'none';
+      dashboardPage.style.display = 'flex';
+    }
+
+    if (localStorage.getItem('auth') === 'true') {
+      showDashboard();
+    }
+
+    const fileInput = document.getElementById('fileInput');
+    const counters = { img: 0, audio: 0, video: 0, doc: 0, other: 0, size: 0 };
+
+    const containers = {
+      img: document.getElementById('imageContainer'),
+      audio: document.getElementById('audioContainer'),
+      video: document.getElementById('videoContainer'),
+      doc: document.getElementById('docContainer'),
+      other: document.getElementById('otherContainer')
+    };
+
+    fileInput?.addEventListener('change', (e) => {
+      const files = e.target.files;
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const card = document.createElement('div');
+          card.className = 'file-card';
+          let type = '';
+          let content = '';
+          if (file.type.startsWith('image/')) {
+            type = 'img';
+            content = `<img src="${reader.result}" alt="${file.name}" />`;
+          } else if (file.type.startsWith('audio/')) {
+            type = 'audio';
+            content = `<audio controls src="${reader.result}"></audio>`;
+          } else if (file.type.startsWith('video/')) {
+            type = 'video';
+            content = `<video controls src="${reader.result}"></video>`;
+          } else if (file.type === 'application/pdf') {
+            type = 'doc';
+            content = `<iframe src="${reader.result}"></iframe>`;
+          } else {
+            type = 'other';
+            content = `<p>${file.name}</p>`;
+          }
+
+          counters[type]++;
+          counters.size += file.size;
+
+          updateDashboard();
+
+          card.innerHTML = `
+            <h4>${file.name}</h4>
+            ${content}
+            <a href="${reader.result}" download="${file.name}">
+              <button>Télécharger</button>
+            </a>
+          `;
+          containers[type].appendChild(card);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    function updateDashboard() {
+      document.getElementById('imgCount').textContent = counters.img;
+      document.getElementById('audioCount').textContent = counters.audio;
+      document.getElementById('videoCount').textContent = counters.video;
+      document.getElementById('docCount').textContent = counters.doc;
+      document.getElementById('otherCount').textContent = counters.other;
+      document.getElementById('totalSize').textContent = (counters.size / (1024 * 1024)).toFixed(2) + ' Mo';
+    }
+  </script>
+</body>
+</html>
